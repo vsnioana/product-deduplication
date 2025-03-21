@@ -23,11 +23,7 @@ for column in df:
 df['hash'] = df['product_title'].map(lambda x: re.sub(r'[^a-zA-Z0-9]', '', x).lower(), na_action='ignore')
 df.apply(lambda x: utils.buildHashForRow(x), axis=1)
 
-df = df.groupby('hash').agg({
-    'unspsc':'first', 
-    'root_domain': ', '.join, 
-    'page_url':', '.join 
-}).reset_index()
+df = df.groupby('hash').agg(utils.buildAggregator(df)).reset_index()
 utils.printCount("after deduplication", df)
 
 df.to_parquet('myfile.parquet')
