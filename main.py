@@ -1,25 +1,33 @@
 import pandas as pd
 import numpy as np
-
-def printCount(label, df):
-    print("Entries " + label + ":\t" + str(len(df)))
+import re
+import utils
 
 # Load the dataset.
 df = pd.read_parquet('veridion_product_deduplication_challenge.snappy.parquet', engine='pyarrow')
 df = df.map(str)
-printCount("before processing", df)
+utils.printCount("before processing", df)
 
-# Same product title on the same domain should be duplicate.
-df = df.drop_duplicates(['root_domain', 'product_title'])
-printCount("after deduplication", df)
-
-# Replace empty values with None.
+# Replace empty values with NaN.
 df = df.replace('[]', np.nan)
+df = df.replace('None', np.nan)
 
 # We want to remove columns that contain the same values for all rows.
 # They don't add any value to our dataset.
 for column in df:
     if len(df[column].unique()) == 1:
-        print("scot " + column)
+        print("Dropping column " + column)
         df = df.drop(column, axis=1)
 
+# Deduplication
+df['hash'] = df['product_title'].map(lambda x: re.sub(r'[^a-zA-Z0-9]', '', x).lower(), na_action='ignore')
+df.apply(lambda x: utils.buildHashForRow(x), axis=1)
+
+df = df.groupby('hash').agg({
+    'unspsc':'first', 
+    'root_domain': ', '.join, 
+    'page_url':', '.join 
+}).reset_index()
+utils.printCount("after deduplication", df)
+
+df.to_parquet('myfile.parquet')
