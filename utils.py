@@ -5,6 +5,8 @@ def printCount(label, df):
 
 # The hash will contain the data that makes a product unique.
 def buildHashForRow(x):
+    if x.hash == "" and isinstance(x.product_name, str):
+        x.hash += x.product_name.lower()
     if isinstance(x.brand, str):
         brand = re.sub(r'[^a-zA-Z0-9]', '', x.brand).lower()
         if brand in x.hash:
@@ -19,5 +21,6 @@ def buildAggregator(df):
     del aggregator['hash']
 
     aggregator['product_title'] = 'first'
+    aggregator['brand'] = 'first'
 
     return aggregator
