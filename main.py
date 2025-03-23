@@ -27,4 +27,4 @@ df = df.groupby('hash').agg(utils.buildAggregator(df)).reset_index()
 utils.printCount("after deduplication", df)
 df = df.drop('hash', axis=1)
 
-df.to_parquet('myfile.parquet')
+df.to_parquet('processed.parquet')
