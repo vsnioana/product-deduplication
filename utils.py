@@ -20,7 +20,7 @@ def buildAggregator(df):
         dict.fromkeys(df.columns[df.dtypes.eq(object)], lambda x: ', '.join(list(dict.fromkeys(filter(lambda x: isinstance(x, str), x))))))
     del aggregator['hash']
 
-    aggregator['product_title'] = 'first'
-    aggregator['brand'] = 'first'
+    for col in ['product_title', 'brand', 'product_summary', 'description']:
+        aggregator[col] = 'first'
 
     return aggregator
